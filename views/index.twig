@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ML Comp</title>
+    <link rel="stylesheet" href="css/app.css" media="screen" title="no title">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Decentralized Machine Learning Competition</h1>
+      <h2>Using Ethereum Blockchain</h2>
+
+      <h4>Developed By: {{ firstName }} {{ lastName }}</h4>
+      <!-- <img src="images/node.svg" alt="" /> -->
+      <button id="startCompetition">Start Competition</button>
+      <button id="initCompetition">InitCompetition</button>
+      <button id="phase">CurrentPhase</button>
+      <button id="getTrainingData">GetTrainingData</button>
+    </div>
+  </body>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript">
+      
+// console.log(web3.eth.getBalance(web3.eth.coinbase))
+
+window.addEventListener('load', function() {
+  console.log("Checking for Web3 injection")
+  if (web3.currentProvider !== 'undefined') {
+  web3 = new Web3(web3.currentProvider);
+  } else {
+  // set the provider you want from Web3.providers
+  web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/"));
+  }
+  console.log(web3.currentProvider)
+  console.log(web3.eth.coinbase)
+
+})
+
+
+
+  web3.version.getNetwork((err, netId) => {
+  switch (netId) {
+    case "1":
+      console.log('This is mainnet')
+      break
+    case "2":
+      console.log('This is the deprecated Morden test network.')
+      break
+    case "3":
+      console.log('This is the ropsten test network.')
+      break
+    case "4":
+      console.log('This is the Rinkeby test network.')
+      break
+    case "42":
+      console.log('This is the Kovan test network.')
+      break
+    default:
+      console.log('This is an unknown network.')
+  }
+  })
+
+// Contract ABI
+  var abi = [
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "cancel_contract",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "submission_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "evaluate_Submissions",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "finalize_contract",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "training",
+        "type": "string"
+      },
+      {
+        "name": "testLabels",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "initCompetition",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+  ]
+
+  var addr = "0x05af5b5bc1d03c826f22a1b8f467beacd1fa5294";
+
+  var dContract = new web3.eth.contract(abi, addr);
+
+  var MyContract = web3.eth.contract(abi);
+
+  var myContractInstance = MyContract.at(addr);
+
+// console.log(myContractInstance)
+
+// myContractInstance.initCompetition.sendTransaction("fromYASH",[1,2,3,44], {from: web3.eth.coinbase})
+
+// myContractInstance.Print(function(err, data) { console.log(JSON.stringify(data)) })
+// console.log(dContract)
+
+//  dContract.initCompetition("fromYASH",[1,2,3,44], function(error, result){
+//      if(!error)
+//          console.log(result)
+//      else
+//          console.error(error);
+//  });
+limit = 3000000;
+const contractInstance = web3.eth.contract(abi).at(addr);
+// contractInstance.initCompetition("fromYASH",[1,2,3,44],{ from: web3.eth.coinbase, value: 0, gas: limit },
+//   (err, res) => { 
+//   /** do something with results **/
+//   console.log("deployed...")
+//   console.log(res)
+//    });
+
+
+// function deployContract() {
+
+//   // Contract object
+//   abi = {{abi}}
+//   bytecode = {{bytecode}}
+//   const contract = web3.eth.contract(abi);
+
+//   // Deploy contract instance
+//   const contractInstance = contract.new({
+//       data: '0x' + bytecode,
+//       from: web3.eth.coinbase,
+//       gas: 90000*2
+//     }, (err, res) => {
+//     if (err) {
+//         console.log(err);
+//         return;
+//     }
+
+//     // Log the tx, you can explore status with eth.getTransaction()
+//     console.log(res.transactionHash);
+
+//     // If we have an address property, the contract was deployed
+//     if (res.address) {
+//         console.log('Contract address: ' + res.address);
+//         // Let's test the deployed contract
+//         // testContract(res.address);
+//     }
+//   });
+// }
+
+
+// put all buttons functions here
+$(document).ready(function() {
+
+    $("#startCompetition").click(function(){
+      deployContract();
+    })
+
+    $("#initCompetition").click(function(){
+        contractInstance.initCompetition("fromYASH",[1,2,3,44],{ from: web3.eth.coinbase, value: 0, gas: limit },
+        (err, res) => { 
+        /** do something with results **/
+        console.log("deployed...")
+        console.log(JSON.stringify(res))
+        });
+    }); 
+
+    $("#phase").click(function(){
+        contractInstance.phase({from: web3.eth.coinbase, value: 0, gas: limit}, (err, res) => {
+        console.log("Got Phase...")
+        console.log(JSON.stringify(res))
+        })
+    })
+
+    $("#getTrainingData").click(function(){
+        contractInstance.getTrainingData({from: web3.eth.coinbase, value: 0, gas: limit}, (err, res) => {
+        console.log("Getting training Data...")
+        console.log(JSON.stringify(res))
+        })
+    })
+
+});
+
+  </script>
+
+  <footer>
+    <p class="center">
+      Powered by Node, Express and Twig Templating <br />&copy; 2016-2017 <a href="http://codedungeon.org" target="_blank">Codedungeon</a>
+    </p>
+  </footer>
+</html>
